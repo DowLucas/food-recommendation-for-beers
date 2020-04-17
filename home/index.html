@@ -123,12 +123,22 @@
 
 
     function beerOptions(page) {
+        // To prevent the user from dubbel clicking the submit button it is hidden for a brief time
         $("#search-beer").css("display", "none")
+        // Clear the current beer which is showing
         clearBeer()
         beer = $("#search-beer").val()
+        if (beer.trim() == "" || beer.includes("?")) {
+            $("#search-beer").css("display", "inline")
+            alert("Invalid search! Please enter a beer.")
+            return
+        }
+
         $("#recommendations").html("")
         $("#beer-options").html("")
         $("#page-selector").html("")
+
+        console.log(beer)
 
         $.get({
             url: "https://api.punkapi.com/v2/beers?page="+page+"&per_page=10&beer_name="+beer,
@@ -138,6 +148,7 @@
                     $("#beer-options").html("<h1 class='text'>No results found </h1>")
                 } else {
                     createTable(dat)
+                    // Depending on page and number of results options for going to previous and next page are displayed
                     if(num_results == 10 && page == 1) {
                         $("#page-selector").append("<div id='sel-page' onclick='beerOptions("+(page+1)+")'>Next page </div>")
                     } else if (num_results == 10 && page > 1) {
@@ -149,31 +160,49 @@
                         $("#page-selector").append("<div id='sel-page' class='mr-3' onclick='beerOptions("+(page-1)+")'>Previous page </div>")
                     }
                 }
+            },
+            error: function(e) {
+                
             }
         })
         $("#search-beer").css("display", "inline")
     }
 
-
+    // Functions which displays the recommendation underneeth the searh bar, kind of like an autocomplete system. 
     function searchRecommendations(val) {
-
-        if (val.trim() == "") {
+        
+        // If the search is an empty string or containts invalid character, dont do anything
+        if (val.trim() == "" || val.includes("?")) {
             return
         }
+
+        // Reset recommendations
         $("#recommendations").html("")
         $.get({
             url: "https://api.punkapi.com/v2/beers?beer_name="+val,
 
             success: function(dat) {
-                if (dat.length > 5) {
-                    count = 5
-                } else {
-                    count = dat.length
+                if (dat == undefined) {
+                    return
                 }
 
-                for (let i = 0; i < count; i++) {
+                show_max_beers = 7
+                if (dat.length > show_max_beers) {
+                    len = show_max_beers
+                } else if (dat.length != 0 && dat.length < show_max_beers) {
+                    len = dat.length
+                } else {
+                    return
+                }
+
+
+                
+                for (let i = 0; i < len; i++) {
                     $("#recommendations").append('<option value="'+dat[i].name+'">')
                 }
+            },
+            error: function(e) {
+                $("#beer-options").html("<h1 class='text'>Invalid search! </h1>")
             }
         })
     }
@@ -195,7 +224,7 @@
         </div>
 
         <div id="choices">
-            <div id="beer-options" class="container center" style="min-height: 600px"></div>  
+            <div id="beer-options" class="container center"></div>  
             <div id="page-selector" class="center"></div>
         </div>
 
