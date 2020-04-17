@@ -4,9 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <title>ÖL Sökaren</title>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+            height: 100%;
+        }
+        body {
+            height: 100%;
+            background-color: #343A40; 
+        }
+        
+        input[type=text] {
+            width: 500px;
+            height: 25px;
+            border-radius: 0;
+            border: none;
+            border-bottom: 2px #DAE0F2 solid;
+            background-color: transparent;
+            color: white;
+        }
+        
+        input[type=text]:focus {
+            outline: none;
+        }
+        
+        input[type=submit] {
+            background: #222529;
+            color: white;
+            transform: translateY(-20%);
+            height: 40px;
+            width: 75px;
+            font: bold 15px arial, sans-serif;
+            text-shadow:none;
+            transition: all 100ms ease-in-out;
+        }
+        
+        input[type=submit]:hover {
+            background: #313233;
+            transition: all 100ms ease-in-out;
+        }
+        
+        .center {
+            display: flex;
+            justify-content: center;
+        }
+        
+        #sel-page {
+            font-size: 15pt;
+            cursor: pointer;
+            color: #DAE0F2;
+        }
+        
+        #sel-page:hover {
+            color: #EAF0CE;
+        
+        }
+        
+        #beer-list-option {
+            cursor: pointer;
+        }
+        
+        #beer-list-option:hover {
+            text-decoration: none;
+            color: grey;
+        }
+        
+        #main {
+            height: fit-content;
+        }
+        
+        .text {
+            color: #DAE0F2;
+        }
+        
+        #beerdetails {
+            color: white
+        }
+
+    </style>
 
     <script>
     function clearBeer() {
@@ -57,7 +135,7 @@
             success: function(dat) {
                 const num_results = dat.length
                 if (dat.length == 0) {
-                    $("#beer-options").html("<h1>No results found </h1>")
+                    $("#beer-options").html("<h1 class='text'>No results found </h1>")
                 } else {
                     createTable(dat)
                     if(num_results == 10 && page == 1) {
@@ -67,6 +145,8 @@
                         $("#page-selector").append("<div id='sel-page' class='ml-3' onclick='beerOptions("+(page+1)+")'>Next page</div>")
                     } else if (num_results < 10 && page == 1) {
                         $("#page-selector").append("<div class='mr-3' style='color: grey;'>No more results </div>")
+                    } else {
+                        $("#page-selector").append("<div id='sel-page' class='mr-3' onclick='beerOptions("+(page-1)+")'>Previous page </div>")
                     }
                 }
             }
@@ -115,7 +195,7 @@
         </div>
 
         <div id="choices">
-            <div id="beer-options" class="container center"></div>  
+            <div id="beer-options" class="container center" style="min-height: 600px"></div>  
             <div id="page-selector" class="center"></div>
         </div>
 
