@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>ÖL Sökaren</title>
+
+    <script>
+    function clearBeer() {
+        $("#beer-name").html("")
+        $("#description").html("")
+        $("#foods").html("")
+    }
+
+
+    function showBeer(beer) {
+        $("#beer-name").html("<h2>"+beer.name+"</h2>")
+        $("#description").html("<p>"+beer.description+"</p><br>")
+        $("#foods").html("<p><strong>The beer pairs well with:</strong> <br><ul id='list-foods'>")
+        
+        for (let food of beer.food_pairing) {
+            $("#list-foods").append("<li>"+food+"</li>")
+        }
+        $("#foods").append("</ul>")
+        window.scrollTo(0, $("#foods").offset().top)
+    }
+
+    function createTable(data) {
+        $("#beer-options").append("<table class='table w-50' style='box-shadow: 0px 0px 5px black;'><thead style='background-color: #B3B8C7;'><tr><th scope='col'>Beer</th scope='col'><th>Alcohol by volume (%)</th></tr></thead><tbody id='table-body' style='background-color: #E7EBF6'></table>")       
+
+        for (let beer of data) {
+            $("#table-body").append('<tr><td scope="row" id="beer-list-option" beer-id='+beer.id+'>'+beer.name+'</td><td>'+beer.abv+'</td></tr>')
+            $("td[beer-id="+beer.id+"]").click(function() {
+                const id = parseInt($(this).attr("beer-id"))
+                const res = data.filter(function(obj) {
+                    return obj.id === id;
+                })
+                showBeer(res[0])
+            })
+        }
+    }
+
+
+    function beerOptions(page) {
+        $("#search-beer").css("display", "none")
+        clearBeer()
+        beer = $("#search-beer").val()
+        $("#recommendations").html("")
+        $("#beer-options").html("")
+        $("#page-selector").html("")
+
+        $.get({
+            url: "https://api.punkapi.com/v2/beers?page="+page+"&per_page=10&beer_name="+beer,
+            success: function(dat) {
+                const num_results = dat.length
+                if (dat.length == 0) {
+                    $("#beer-options").html("<h1>No results found </h1>")
+                } else {
+                    createTable(dat)
+                    if(num_results == 10 && page == 1) {
+                        $("#page-selector").append("<div id='sel-page' onclick='beerOptions("+(page+1)+")'>Next page </div>")
+                    } else if (num_results == 10 && page > 1) {
+                        $("#page-selector").append("<div id='sel-page' class='mr-3' onclick='beerOptions("+(page-1)+")'>Previous page </div>")
+                        $("#page-selector").append("<div id='sel-page' class='ml-3' onclick='beerOptions("+(page+1)+")'>Next page</div>")
+                    } else if (num_results < 10 && page == 1) {
+                        $("#page-selector").append("<div class='mr-3' style='color: grey;'>No more results </div>")
+                    }
+                }
+            }
+        })
+        $("#search-beer").css("display", "inline")
+    }
+
+
+    function searchRecommendations(val) {
+
+        if (val.trim() == "") {
+            return
+        }
+        $("#recommendations").html("")
+        $.get({
+            url: "https://api.punkapi.com/v2/beers?beer_name="+val,
+
+            success: function(dat) {
+                if (dat.length > 5) {
+                    count = 5
+                } else {
+                    count = dat.length
+                }
+
+                for (let i = 0; i < count; i++) {
+                    $("#recommendations").append('<option value="'+dat[i].name+'">')
+                }
+            }
+        })
+    }
+
+
+    </script>
+
+</head>
+<body>
+
+    <div id="main">
+        <div class="d-flex justify-content-center">
+            <div id="search" class="my-5">
+                <h3 class="text">Search</h3>
+                <input class="mx-auto" type="text" name="beer" list="recommendations" id="search-beer" onkeyup="searchRecommendations(this.value)">
+                <datalist id="recommendations"></datalist>
+                <input value="Search" class="ml-4" type="submit" onclick="beerOptions(1)">
+            </div>
+        </div>
+
+        <div id="choices">
+            <div id="beer-options" class="container center"></div>  
+            <div id="page-selector" class="center"></div>
+        </div>
+
+
+        <div id="beerdetails" class="mt-5" style="padding-bottom: 150px">
+            <div id="beer-name" class="w-50 mx-auto">
+
+            </div>
+            <div id="specifics" class="w-50 mx-auto">
+                <div id="description"></div>
+                <div id="foods"></div>
+            </div>
+
+        </div>
+
+
+        
+
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $("#search-beer").keypress(function(event) {
+                var keycode = (event.keyCode ? event.keyCode : event.which);
+                if(keycode == '13'){
+                    $("#search-beer").blur()
+                    beerOptions(1)
+                }
+            })
+        }) 
+
+    </script>
+
+</body>
+</html>
