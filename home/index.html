@@ -130,8 +130,8 @@
         if (beer == null) {
             beer = $("#search-beer").val()
         }
-
-        if (beer.trim() == "" || beer.includes("?")) {
+        const URL = "https://api.punkapi.com/v2/beers?page="+page+"&per_page=10&beer_name="+beer
+        if (beer.trim() == "" || beer.includes("?") || !validURL(URL)) {
             $("#search-beer").css("display", "inline")
             alert("Invalid search! Please enter a beer.")
             return
@@ -143,7 +143,12 @@
 
 
         $.get({
-            url: "https://api.punkapi.com/v2/beers?page="+page+"&per_page=10&beer_name="+beer,
+            url: URL,
+            statusCode: {
+                500: function() {
+                  alert("Script exhausted");
+                }
+            },
             success: function(dat) {
                 const num_results = dat.length
                 if (dat.length == 0) {
@@ -164,25 +169,36 @@
                 }
             },
             error: function(e) {
-                
+                console.log("Error")
             }
         })
         $("#search-beer").css("display", "inline")
     }
 
+    function validURL(str) {
+        var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+          '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+          '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+          '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+          '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+          '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+        return !!pattern.test(str);
+    }
+
     // Functions which displays the recommendation underneeth the searh bar, kind of like an autocomplete system. 
     function searchRecommendations(val) {
-        
+        const URL = "https://api.punkapi.com/v2/beers?beer_name="+val
         // If the search is an empty string or containts invalid character, dont do anything
-        if (val.trim() == "" || val.includes("?")) {
+        if (val.trim() == "" || val.includes("?") || !validURL(URL)) {
             return
         }
+
+
 
         // Reset recommendations
         $("#recommendations").html("")
         $.get({
-            url: "https://api.punkapi.com/v2/beers?beer_name="+val,
-
+            url: URL,
             success: function(dat) {
                 if (dat == undefined) {
                     return
