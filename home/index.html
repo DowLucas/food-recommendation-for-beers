@@ -144,11 +144,6 @@
 
         $.get({
             url: URL,
-            statusCode: {
-                500: function() {
-                  alert("Script exhausted");
-                }
-            },
             success: function(dat) {
                 const num_results = dat.length
                 if (dat.length == 0) {
