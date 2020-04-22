@@ -131,7 +131,8 @@
         if (beer == null) {
             beer = $("#search-beer").val()
         }
-
+        
+        // Added because spaces makes url invalid
         beer = beer.replace(" ", "%20")
 
         const URL = "https://api.punkapi.com/v2/beers?page="+page+"&per_page=10&beer_name="+beer
