@@ -125,11 +125,15 @@
     function beerOptions(page, beer=null) {
         // To prevent the user from dubbel clicking the submit button it is hidden for a brief time
         $("#search-beer").css("display", "none")
-        // Clear the current beer which is showing
+        // Clear the current beer which is showing'
+
         clearBeer()
         if (beer == null) {
             beer = $("#search-beer").val()
         }
+
+        beer = beer.replace(" ", "%20")
+
         const URL = "https://api.punkapi.com/v2/beers?page="+page+"&per_page=10&beer_name="+beer
         if (beer.trim() == "" || beer.includes("?") || !validURL(URL)) {
             $("#search-beer").css("display", "inline")
